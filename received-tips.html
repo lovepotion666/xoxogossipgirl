@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Received Tips - Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💋</text></svg>">
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/sf-pro-display">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap" rel="stylesheet">
+<script>
+    // CRITICAL: Check Auth immediately in HEAD to prevent page flash
+    if (sessionStorage.getItem('admin_auth') !== 'true') {
+        window.location.replace('index.html');
+    }
+</script>
+<style>
+:root { --pink: #ff4fd8; --bg: #050505; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Apple Color Emoji', 'SF Pro Display', 'Noto Sans Arabic', sans-serif; }
+body { background: #050505; color: white; padding: 20px; }
+header { text-align: center; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
+h2 { color: var(--pink); letter-spacing: -1px; }
+.container { max-width: 600px; margin: 0 auto; }
+.tip-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,79,216,0.3); padding: 20px; border-radius: 20px; margin-bottom: 20px; }
+img { width: 100%; border-radius: 12px; margin-top: 10px; }
+.actions { display: flex; gap: 10px; margin-top: 15px; }
+button { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.btn-approve { background: var(--pink); color: black; }
+.btn-decline { background: rgba(255,255,255,0.1); color: white; }
+.bulk-wrap { display: flex; gap: 10px; margin-bottom: 25px; }
+.version { position: fixed; bottom: 10px; right: 15px; font-size: 10px; opacity: 0.3; }
+</style>
+</head>
+<body>
+<header>
+  <h2>Inbox</h2>
+  <div style="font-size:11px; opacity:0.6; margin-top:5px;">happy christmas 🎄</div>
+</header>
+<div class="container">
+  <div class="bulk-wrap">
+    <button class="btn-approve" onclick="bulk(true)">Approve All</button>
+    <button class="btn-decline" onclick="bulk(false)">Decline All</button>
+  </div>
+  <div id="list"></div>
+  <div style="margin-top:30px; display:flex; gap:10px;">
+      <button onclick="location.href='index.html'" style="background:none; border:1px solid var(--pink); color:var(--pink);">Back to Feed</button>
+      <button onclick="logout()" style="background:none; border:1px solid #ff4444; color:#ff4444;">Logout</button>
+  </div>
+</div>
+<div class="version">v4.0</div>
+<script>
+const FEED_KEY = 'xoxo_feed_v4'; const TIPS_KEY = 'xoxo_tips_v4';
+if (Notification.permission !== "granted") Notification.requestPermission();
+
+function render() {
+  const tips = JSON.parse(localStorage.getItem(TIPS_KEY) || '[]');
+  const list = document.getElementById('list');
+  if (tips.length === 0) { list.innerHTML = '<p style="text-align:center; opacity:0.5; padding:20px;">No pending tips.</p>'; return; }
+  list.innerHTML = '';
+  tips.forEach((t, i) => {
+    const d = document.createElement('div'); d.className = 'tip-card';
+    d.innerHTML = `<div>${t.text}</div>${t.image ? `<img src="${t.image}">` : ''}
+      <div class="actions"><button class="btn-approve" onclick="decide(${i}, true)">Approve</button><button class="btn-decline" onclick="decide(${i}, false)">Decline</button></div>`;
+    list.appendChild(d);
+  });
+}
+
+function notify() { if(Notification.permission==="granted") new Notification("SPOTTED! New gossip released 💋"); }
+
+window.decide = (index, approve) => {
+  let tips = JSON.parse(localStorage.getItem(TIPS_KEY)||'[]');
+  let feed = JSON.parse(localStorage.getItem(FEED_KEY)||'[]');
+  if(approve) { tips[index].date = Date.now(); feed.push(tips[index]); notify(); }
+  tips.splice(index, 1);
+  localStorage.setItem(FEED_KEY, JSON.stringify(feed));
+  localStorage.setItem(TIPS_KEY, JSON.stringify(tips));
+  render();
+};
+
+window.bulk = (approve) => {
+  let tips = JSON.parse(localStorage.getItem(TIPS_KEY)||'[]');
+  let feed = JSON.parse(localStorage.getItem(FEED_KEY)||'[]');
+  if(approve) { tips.forEach(t => { t.date=Date.now(); feed.push(t); }); if(tips.length) notify(); }
+  localStorage.setItem(FEED_KEY, JSON.stringify(feed)); localStorage.setItem(TIPS_KEY, '[]'); render();
+};
+function logout() { sessionStorage.removeItem('admin_auth'); location.href='index.html'; }
+render();
+</script>
+</body>
+</html>

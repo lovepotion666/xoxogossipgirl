@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>xoxo gossip girl</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#000000">
+
+<meta property="og:title" content="XOXO Gossip Girl">
+<meta property="og:image" content="https://em-content.zobj.net/source/apple/354/kiss-mark_1f48b.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22></text></svg>">
+
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/sf-pro-display">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --pink: #ff4fd8;
+  --hot: #ff1aa6;
+  --bg: #000000;
+  --glass: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.12);
+}
+
+* {
+  box-sizing: border-box; margin: 0; padding: 0;
+  /* FORCE iOS EMOJI PRIORITY */
+  font-family: 'Apple Color Emoji', 'SF Pro Display', 'Noto Sans Arabic', 'Segoe UI Emoji', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: 
+    radial-gradient(circle at 10% 10%, #2b1445 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, #1b0f33 0%, transparent 40%),
+    #050505;
+  color: white; min-height: 100vh; overflow-x: hidden; padding-bottom: 50px;
+}
+
+/* Header */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+  border-bottom: 0.5px solid var(--border);
+  padding: 15px 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.logo { font-weight: 900; font-size: 24px; letter-spacing: -1px; text-shadow: 0 0 15px rgba(255,79,216,0.6); cursor: pointer; }
+.logo span { color: var(--pink); }
+.subtitle { font-size: 11px; font-weight: 600; color: #fff; opacity: 0.8; margin-top: 2px; }
+
+.admin-btn {
+  position: absolute; right: 20px; top: 22px;
+  font-size: 11px; font-weight: 700; color: var(--pink);
+  background: rgba(255, 79, 216, 0.1); padding: 6px 12px; border-radius: 20px;
+  cursor: pointer; transition: 0.3s;
+}
+
+/* Admin Modal (Liquid Glass) */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+  z-index: 999; display: none; align-items: center; justify-content: center;
+}
+.modal-box {
+  background: rgba(20, 20, 20, 0.9);
+  border: 1px solid var(--pink);
+  padding: 30px; border-radius: 30px;
+  width: 85%; max-width: 320px; text-align: center;
+  box-shadow: 0 0 50px rgba(255, 79, 216, 0.25);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.modal-input {
+  width: 100%; padding: 12px; border-radius: 12px; margin: 15px 0;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  color: white; text-align: center; font-size: 16px; outline: none;
+}
+.modal-btn { width: 100%; padding: 12px; background: var(--pink); border: none; border-radius: 99px; font-weight: bold; cursor: pointer; color: black; }
+.modal-close { margin-top: 15px; font-size: 12px; opacity: 0.5; cursor: pointer; text-decoration: underline; }
+
+/* Main Layout */
+.wrap { max-width: 800px; margin: 25px auto; padding: 0 20px; }
+.card {
+  background: var(--glass); backdrop-filter: blur(20px); border: 0.5px solid var(--border);
+  border-radius: 28px; padding: 24px; margin-bottom: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+textarea {
+  width: 100%; background: rgba(0,0,0,0.3); border: none; border-radius: 18px; padding: 16px;
+  color: white; font-size: 16px; resize: none; outline: none; margin-bottom: 15px;
+}
+.btn-group { display: flex; gap: 10px; }
+button {
+  border: none; padding: 14px; border-radius: 99px; font-weight: 700; font-size: 14px;
+  cursor: pointer; flex: 1; transition: 0.2s;
+}
+.btn-media { background: rgba(255,255,255,0.1); color: white; display:flex; align-items:center; justify-content:center; gap:5px;}
+.btn-send { background: linear-gradient(135deg, var(--pink), var(--hot)); color: black; }
+
+/* Search & Feed */
+.search-bar {
+  width: 100%; padding: 14px 20px; border-radius: 20px; background: rgba(255,255,255,0.08);
+  border: 0.5px solid var(--border); color: white; font-size: 14px; margin-bottom: 25px; outline: none;
+}
+.badge { background: var(--pink); color: black; font-size: 10px; padding: 3px 8px; border-radius: 10px; font-weight: 800; display: none; margin-left: 8px; vertical-align: middle; }
+
+.post {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+  border: 0.5px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 20px;
+  cursor: pointer; transition: 0.3s;
+}
+.post:hover { border-color: rgba(255, 79, 216, 0.4); transform: translateY(-3px); }
+
+.anon-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.avatar {
+  width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #333, #111);
+  border: 1px solid var(--pink); color: var(--pink); display: flex; align-items: center; justify-content: center; font-weight: 800;
+}
+.post-img { width: 100%; border-radius: 16px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.1); }
+.post-meta { margin-top: 15px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; font-size: 11px; opacity: 0.5; }
+
+.footer-quote { text-align: center; font-style: italic; opacity: 0.6; margin-top: 40px; font-size: 13px; color: var(--pink); }
+.version { position: fixed; bottom: 10px; right: 15px; font-size: 10px; opacity: 0.3; }
+#preview-img { width: 100%; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--pink); display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo" onclick="location.reload()">xoxo <span>gossip girl</span></div>
+  <div class="subtitle">happy christmas </div>
+  <a class="admin-btn" onclick="openModal()">Admin</a>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h3 style="margin-bottom:15px; font-size:18px;">Spill the Tea</h3>
+    <textarea id="tipText" rows="3" placeholder="Who was spotted?"></textarea>
+    <img id="preview-img">
+    <div class="btn-group">
+      <button class="btn-media" onclick="document.getElementById('mediaInput').click()"> Photo</button>
+      <button class="btn-send" id="sendBtn">Drop Tip</button>
+    </div>
+    <input type="file" id="mediaInput" accept="image/*" hidden>
+  </div>
+
+  <input type="text" id="searchInput" class="search-bar" placeholder="Search spotted gossip...">
+
+  <div style="margin-bottom: 20px;">
+    <h3 style="display:inline; font-size:18px;">Spotted!</h3>
+    <span id="newBadge" class="badge">0 NEW</span>
+  </div>
+
+  <div id="feed"></div>
+  <div class="footer-quote">you know you love me, xoxo </div>
+</div>
+
+<div id="adminModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="color:var(--pink); margin-bottom:5px;">Admin Access</h3>
+        <p style="font-size:12px; opacity:0.6;">Enter the secret key</p>
+        <input type="password" id="adminPass" class="modal-input" placeholder="Password">
+        <button class="modal-btn" onclick="tryLogin()">Unlock</button>
+        <div class="modal-close" onclick="closeModal()">Cancel</div>
+    </div>
+</div>
+
+<div class="version">v4.0</div>
+
+<script>
+const FEED_KEY = 'xoxo_feed_v4';
+const TIPS_KEY = 'xoxo_tips_v4';
+const LAST_VISIT = 'xoxo_last_visit_v4';
+const ADMIN_PASS = 'ykuluvmexoxogg2026xxx';
+
+let feed = JSON.parse(localStorage.getItem(FEED_KEY) || '[]');
+let imageData = null;
+let lastVisit = localStorage.getItem(LAST_VISIT) || Date.now();
+
+// --- IMAGE COMPRESSION ---
+function compressImage(file, callback) {
+    const reader = new FileReader(); reader.readAsDataURL(file);
+    reader.onload = event => {
+        const img = new Image(); img.src = event.target.result;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const maxWidth = 800; const scale = maxWidth/img.width;
+            canvas.width = maxWidth; canvas.height = img.height*scale;
+            ctx.drawImage(img,0,0,canvas.width,canvas.height);
+            callback(canvas.toDataURL('image/jpeg', 0.7));
+        }
+    }
+}
+document.getElementById('mediaInput').onchange = (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  compressImage(file, (res) => { imageData = res; document.getElementById('preview-img').src=res; document.getElementById('preview-img').style.display='block'; });
+};
+
+document.getElementById('sendBtn').onclick = () => {
+  const text = document.getElementById('tipText').value.trim();
+  if (!text && !imageData) { alert('Say something...'); return; }
+  let tips = JSON.parse(localStorage.getItem(TIPS_KEY)||'[]');
+  tips.push({ id: Date.now(), text, image: imageData, date: Date.now(), views: 0, likes: 0 });
+  localStorage.setItem(TIPS_KEY, JSON.stringify(tips));
+  document.getElementById('tipText').value=''; document.getElementById('preview-img').style.display='none'; imageData=null;
+  alert('Tip sent to Gossip Girl. ');
+};
+
+function timeAgo(t) {
+  const s = Math.floor((Date.now()-t)/1000);
+  if(s<60) return 'Just now'; if(s<3600) return Math.floor(s/60)+'m ago';
+  if(s<86400) return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago';
+}
+
+function render(filter='') {
+  const c = document.getElementById('feed'); c.innerHTML='';
+  let newCount = 0;
+  const filtered = feed.filter(p => p.text.toLowerCase().includes(filter.toLowerCase()));
+  if(filtered.length === 0) { c.innerHTML='<div style="text-align:center; opacity:0.4; padding:20px;">The streets are quiet...</div>'; return; }
+  filtered.slice().reverse().forEach(p => {
+    if(p.date > lastVisit) newCount++;
+    const d = document.createElement('div'); d.className='post';
+    d.onclick = () => { localStorage.setItem('currentPostId', p.id); location.href='comments.html'; };
+    d.innerHTML = `<div class="anon-head"><div class="avatar">?</div><div style="font-weight:700;">Anonymous User</div></div>
+      <div class="post-text">${p.text}</div>${p.image ? `<img src="${p.image}" class="post-img">` : ''}
+      <div class="post-meta"><span>${timeAgo(p.date)}</span><span style="color:var(--pink)"> ${p.likes||0}</span></div>`;
+    c.appendChild(d);
+  });
+  if(newCount>0) { document.getElementById('newBadge').innerText=`${newCount} NEW`; document.getElementById('newBadge').style.display='inline-block'; }
+}
+
+// --- ADMIN MODAL LOGIC ---
+const modal = document.getElementById('adminModal');
+function openModal() { modal.style.display = 'flex'; }
+function closeModal() { modal.style.display = 'none'; }
+function tryLogin() {
+    const pass = document.getElementById('adminPass').value;
+    if(pass === ADMIN_PASS) {
+        sessionStorage.setItem('admin_auth', 'true');
+        location.href = 'received-tips.html';
+    } else {
+        alert('Wrong password, sorry.');
+        closeModal();
+    }
+}
+
+document.getElementById('searchInput').oninput=(e)=>render(e.target.value);
+window.onbeforeunload=()=>localStorage.setItem(LAST_VISIT,Date.now());
+render();
+</script>
+</body>
+</html>
