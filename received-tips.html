@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Vault | v2.5</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/sf-pro-display">
+<style>
+    body { background: #000; color: #fff; font-family: 'SF Pro Display', sans-serif; padding: 25px; }
+    .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(40px); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 30px; padding: 25px; margin-bottom: 25px; }
+    .btn-row { display: flex; gap: 15px; margin-top: 20px; }
+    .btn { flex: 1; padding: 16px; border-radius: 18px; border: none; font-weight: 900; cursor: pointer; }
+    .v-tag { position: fixed; bottom: 20px; right: 20px; font-size: 10px; opacity: 0.4; font-weight: 900; }
+</style>
+</head>
+<body>
+    <h1 style="text-align:center; font-weight:900; margin-bottom:40px;">Incoming Tea</h1>
+    <div id="list" style="max-width:500px; margin:0 auto;"></div>
+    <center><button onclick="location.href='index.html'" style="background:none; color:#ff4fd8; border:none; font-weight:900; margin-top:30px;">EXIT VAULT</button></center>
+    <div class="v-tag">v2.5</div>
+<script>
+    if (sessionStorage.getItem('admin_auth') !== 'true') location.href = 'index.html';
+    const firebaseConfig = { apiKey: "AIzaSyCTdVcJspQxXiq_Kd7ImL32xWsjv0HgENE", authDomain: "gossip-girl-4c9f2.firebaseapp.com", projectId: "gossip-girl-4c9f2", databaseURL: "https://gossip-girl-4c9f2-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    db.ref('tips').on('value', s => {
+        const list = document.getElementById('list'); list.innerHTML = '';
+        const data = s.val(); if(!data) return;
+        Object.keys(data).forEach(id => {
+            const item = data[id];
+            const div = document.createElement('div'); div.className = 'glass';
+            let img = item.image ? `<img src="${item.image}" style="width:100%; border-radius:15px; margin-bottom:15px;">` : '';
+            div.innerHTML = `${img}<p style="font-size:17px;">${item.text}</p><div class="btn-row">
+                <button class="btn" style="background:#1a1a1a; color:red;" onclick="db.ref('tips/${id}').remove()">BURN</button>
+                <button class="btn" style="background:#ff4fd8; color:#000;" onclick="approve('${id}')">PUBLISH</button>
+            </div>`;
+            list.appendChild(div);
+        });
+    });
+    async function approve(id) { 
+        const snap = await db.ref('tips/'+id).once('value'); 
+        await db.ref('posts').push(snap.val()); 
+        db.ref('tips/'+id).remove(); 
+    }
+</script>
+</body>
+</html>

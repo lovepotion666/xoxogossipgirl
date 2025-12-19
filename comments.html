@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Thread | v2.5</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/sf-pro-display">
+<style>
+    body { background: #000; color: #fff; font-family: 'SF Pro Display', sans-serif; padding: 25px; padding-bottom: 120px; }
+    .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(40px); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 30px; padding: 25px; margin-bottom: 25px; }
+    .bar { position: fixed; bottom: 25px; left: 15px; right: 15px; background: rgba(15,15,15,0.95); backdrop-filter: blur(30px); border-radius: 50px; padding: 8px; display: flex; border: 0.5px solid rgba(255,255,255,0.1); }
+    input { flex: 1; background: transparent; border: none; color: #fff; padding: 0 20px; outline: none; }
+    .send { background: #ff4fd8; border: none; padding: 12px 25px; border-radius: 40px; font-weight: 900; }
+    .v-tag { position: fixed; bottom: 100px; right: 25px; font-size: 10px; opacity: 0.3; font-weight: 900; pointer-events: none; }
+    .c-bubble { padding: 15px; border-bottom: 0.5px solid #222; animation: fade 0.3s ease; }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</head>
+<body>
+    <a href="index.html" style="color:#ff4fd8; text-decoration:none; font-weight:900; font-size:14px;"> BACK</a>
+    <div id="mainPost" style="margin-top:25px;"></div>
+    <div id="comsList" style="margin-top:20px;"></div>
+    <div class="bar"><input type="text" id="mIn" placeholder="Spill..."><button class="send" id="sBtn">SEND</button></div>
+    <div class="v-tag">v2.5</div>
+<script>
+    const firebaseConfig = { apiKey: "AIzaSyCTdVcJspQxXiq_Kd7ImL32xWsjv0HgENE", authDomain: "gossip-girl-4c9f2.firebaseapp.com", projectId: "gossip-girl-4c9f2", databaseURL: "https://gossip-girl-4c9f2-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const pid = localStorage.getItem('currentPostId');
+
+    db.ref('posts/'+pid).on('value', s => {
+        const p = s.val(); if(!p) return;
+        let img = p.image ? `<img src="${p.image}" style="width:100%; border-radius:20px; margin-bottom:15px;">` : '';
+        document.getElementById('mainPost').innerHTML = `<div class="glass">${img}<p style="font-size:19px;">${p.text}</p></div>`;
+    });
+    db.ref('comments/'+pid).on('value', s => {
+        const list = document.getElementById('comsList'); list.innerHTML = '';
+        const d = s.val(); if(d) Object.keys(d).forEach(k => {
+            const div = document.createElement('div'); div.className = 'c-bubble';
+            div.innerHTML = `<small style="color:#ff4fd8; font-weight:900;">USER_${k.slice(-4).toUpperCase()}</small><p style="margin-top:5px;">${d[k].text}</p>`;
+            list.appendChild(div);
+        });
+    });
+    document.getElementById('sBtn').onclick = () => {
+        const v = document.getElementById('mIn').value.trim();
+        if(v) db.ref('comments/'+pid).push({ text:v, date:Date.now() }).then(()=>document.getElementById('mIn').value='');
+    };
+</script>
+</body>
+</html>
