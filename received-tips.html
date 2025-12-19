@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Vault | Gossip Girl Admin v6.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/sf-pro-display">
+
+<style>
+:root {
+    --pink: #ff4fd8;
+    --red: #ff3b30;
+    --glass: rgba(255, 255, 255, 0.04);
+    --border: rgba(255, 255, 255, 0.1);
+    --inner-glow: inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+    background: radial-gradient(circle at 50% 0%, #1a0f33 0%, #050505 100%) fixed;
+    color: #fff;
+    font-family: 'SF Pro Display', -apple-system, sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* --- TITANIUM HEADER --- */
+header {
+    position: sticky; top: 0; z-index: 1000;
+    padding: 22px 25px;
+    background: rgba(5, 5, 5, 0.7);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border-bottom: 0.5px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.vault-title { font-weight: 900; font-size: 22px; letter-spacing: -1px; }
+.vault-title span { color: var(--pink); text-shadow: 0 0 15px rgba(255, 79, 216, 0.4); }
+
+.pill-count {
+    background: var(--pink); color: #000;
+    padding: 5px 14px; border-radius: 40px; font-weight: 900; font-size: 11px;
+    box-shadow: 0 0 15px rgba(255, 79, 216, 0.3);
+}
+
+/* --- VAULT GRID --- */
+.container { max-width: 650px; margin: 30px auto; padding: 0 20px 120px; }
+
+.tip-card {
+    background: var(--glass);
+    backdrop-filter: blur(45px) saturate(210%);
+    -webkit-backdrop-filter: blur(45px) saturate(210%);
+    border: 1px solid var(--border);
+    box-shadow: 0 25px 45px rgba(0,0,0,0.4), var(--inner-glow);
+    border-radius: 32px;
+    padding: 28px;
+    margin-bottom: 22px;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s;
+    animation: cardEntrance 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes cardEntrance { 
+    from { opacity: 0; transform: translateY(20px) scale(0.98); } 
+    to { opacity: 1; transform: translateY(0) scale(1); } 
+}
+
+.tip-card.exit { opacity: 0; transform: scale(0.9) translateY(-10px); }
+
+.meta { font-size: 10px; font-weight: 900; color: var(--pink); margin-bottom: 14px; letter-spacing: 1.5px; opacity: 0.7; }
+.content { font-size: 18px; line-height: 1.6; color: rgba(255,255,255,0.95); margin-bottom: 25px; }
+
+/* --- ACTION SWITCHES --- */
+.action-bar { display: flex; gap: 14px; }
+.action-btn {
+    flex: 1; padding: 16px; border-radius: 24px; border: none; font-weight: 900; font-size: 14px;
+    cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+.publish-btn { 
+    background: linear-gradient(135deg, var(--pink), #ff1aa6); 
+    color: #fff; box-shadow: 0 10px 20px rgba(255, 79, 216, 0.3);
+}
+.burn-btn { 
+    background: rgba(255, 59, 48, 0.08); 
+    color: var(--red); border: 1px solid rgba(255, 59, 48, 0.2); 
+}
+
+.action-btn:active { transform: scale(0.94); filter: brightness(1.3) saturate(1.2); }
+
+/* --- SYSTEM UI --- */
+.empty-state {
+    text-align: center; margin-top: 120px;
+}
+.empty-icon { font-size: 40px; margin-bottom: 15px; opacity: 0.2; display: block; }
+.empty-text { opacity: 0.3; font-style: italic; font-weight: 500; }
+
+.exit-pill {
+    position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border);
+    padding: 14px 30px; border-radius: 99px; backdrop-filter: blur(25px);
+    color: #fff; font-weight: 900; text-decoration: none; font-size: 12px;
+    letter-spacing: 1px; transition: 0.3s; z-index: 1001;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+}
+.exit-pill:active { transform: translateX(-50%) scale(0.9); background: var(--pink); color: #000; }
+
+.v-tag { position: fixed; bottom: 15px; right: 20px; font-size: 9px; opacity: 0.2; font-weight: 900; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<header>
+    <div class="vault-title">The <span>Vault</span></div>
+    <div class="pill-count" id="totalCount">0 TIPS</div>
+</header>
+
+<div class="container">
+    <div id="tipContainer"></div>
+    <div id="emptyView" class="empty-state" style="display:none;">
+        <span class="empty-icon"></span>
+        <p class="empty-text">The inbox is silent. No secrets to manage.</p>
+    </div>
+</div>
+
+<a href="index.html" class="exit-pill">CLOSE VAULT</a>
+<div class="v-tag">VAULT v6.0 | ENCRYPTED</div>
+
+<script>
+// --- ATOMIC SECURITY ---
+if (sessionStorage.getItem('admin_auth') !== 'true') {
+    window.location.replace('index.html');
+}
+
+// --- CORE INIT ---
+const firebaseConfig = { apiKey: "AIzaSyCTdVcJspQxXiq_Kd7ImL32xWsjv0HgENE", authDomain: "gossip-girl-4c9f2.firebaseapp.com", projectId: "gossip-girl-4c9f2", storageBucket: "gossip-girl-4c9f2.firebasestorage.app", messagingSenderId: "206020058212", appId: "1:206020058212:web:fb7c70aa1e3765e6691371" };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// --- LIVE VAULT SYNC ---
+db.ref('tips').on('value', snapshot => {
+    const container = document.getElementById('tipContainer');
+    const empty = document.getElementById('emptyView');
+    const label = document.getElementById('totalCount');
+    
+    container.innerHTML = '';
+    const data = snapshot.val();
+    
+    if(!data) {
+        empty.style.display = 'block';
+        label.innerText = '0 TIPS';
+        return;
+    }
+
+    empty.style.display = 'none';
+    const keys = Object.keys(data).reverse();
+    label.innerText = keys.length + ' TIPS';
+
+    keys.forEach(id => {
+        const tip = data[id];
+        const card = document.createElement('div');
+        card.className = 'tip-card';
+        card.id = `card-${id}`;
+        card.innerHTML = `
+            <div class="meta">PENDING BROADCAST</div>
+            <div class="content">${tip.text}</div>
+            <div class="action-bar">
+                <button class="action-btn burn-btn" onclick="moderatorAction('${id}', 'burn')">Burn</button>
+                <button class="action-btn publish-btn" onclick="moderatorAction('${id}', 'publish', '${tip.text.replace(/'/g, "\\'")}')">Publish</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+});
+
+// --- ATOMIC MODERATION ENGINE ---
+function moderatorAction(id, type, text = '') {
+    const card = document.getElementById(`card-${id}`);
+    
+    if (type === 'burn') {
+        if (!confirm('Destroy this evidence? ')) return;
+        card.classList.add('exit');
+        setTimeout(() => db.ref('tips/' + id).remove(), 400);
+    } 
+    
+    else if (type === 'publish') {
+        card.style.pointerEvents = 'none';
+        card.style.opacity = '0.5';
+        
+        // Push to Posts then Kill Tip
+        db.ref('posts').push({
+            text: text,
+            date: Date.now()
+        }).then(() => {
+            card.classList.add('exit');
+            setTimeout(() => db.ref('tips/' + id).remove(), 400);
+        }).catch(err => {
+            alert('Relay failed. Check connection.');
+            card.style.pointerEvents = 'auto';
+            card.style.opacity = '1';
+        });
+    }
+}
+</script>
+</body>
+</html>
